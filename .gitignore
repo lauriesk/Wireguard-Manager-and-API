@@ -1,3 +1,6 @@
 wireguard-manager-and-api
 main
 .env
+config.json
+work
+wgManagerAPI

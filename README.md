@@ -1,12 +1,14 @@
-[![Discord](https://img.shields.io/discord/900096719482654780?color=D6AD5B&labelColor=131313&style=for-the-badge&label=Discord&logo=discord)](https://discord.gg/fXMzVqb3qB "Chat and get support from the team and community.")
-[![Gitlab](https://img.shields.io/gitlab/pipeline-status/mawthuq-software/wireguard-manager-and-api?branch=main&color=D6AD5B&labelColor=131313&logoColor=D6AD5B&style=for-the-badge&label=Main-Branch&logo=gitlab)](https://g.codefresh.io/public/accounts/sunnahvpn/pipelines/new/610a9aa2b902ba4976f1c58d?filter=page:1 "View public build logs for docker container.")
-[![GitHub Downloads](https://img.shields.io/github/downloads/Mawthuq-Software/wireguard-manager-and-api/total?color=D6AD5B&labelColor=131313&style=for-the-badge&label=Downloads&logo=github)](https://github.com/Mawthuq-Software/wireguard-manager-and-api "Download the API today")
+This fork:
+- TODO: removes most of the API calls. Only 'Add client' is left;
+- adds 'SERVER.WORKDIR' configuration option;
+- uses conf file at the same directory as executable
+- one log file, new entries appended at the end
 
-# Wireguard Manager And API
+ # Wireguard Manager And API
 
 A manager and API to add, remove clients as well as other features such as an auto reapplier which deletes and adds back a client after inactivity to increase their privacy by removing their IP address from memory.
 
-This GoLang application runs an API which can be made **https** ready using a LetsEncrypt certificate. The program creates directories in the directory ``/opt/wgManagerAPI`` (This needs to be created manually before hand). In the ``/opt/wgManagerAPI`` directory we have a few more sub-directories such as ``/logs`` which contain logs of the application and ``/wg`` which contains our SQLite database.
+This GoLang application runs an API which can be made **https** ready using a LetsEncrypt certificate. The program creates directories in the directory ``SERVER.WORKDIR`` (This needs to be created manually before hand). In the ``SERVER.WORKDIR`` directory we have a few more sub-directories such as ``/logs`` which contain logs of the application and ``/wg`` which contains our SQLite database.
 
 The SQLite database contains tables which store information such as generated and available IPs, client configuration (public key and preshared key) as well as the Wireguard server own private key, public key, IP Addresses and ListenPort.
 
@@ -27,7 +29,7 @@ The SQLite database contains tables which store information such as generated an
     - [Logs](#logs)
     - [FAQ](#faq)
 ## Config.json File
-A config.json file needs to be placed in the directory `/opt/wgManagerAPI/config.json`. A template can be found in the `src/config/template.json`.
+A config.json file needs to be placed in the directory `./config.json`. A template can be found in the `src/config/template.json`.
 
 ### Instance settings
 | Variable | Purpose | Type |
@@ -54,6 +56,7 @@ A config.json file needs to be placed in the directory `/opt/wgManagerAPI/config
 | SERVER.PORT  | The port that is used to run the API server (this is not the Wireguard server port). Default of port of 8443 | string |
 | SERVER.AUTOCHECK | Enable the autochecker (automatically deletes and re-adds client keys after inactivity to increase privacy of user) by setting this to ``enabled``. Disable by setting to ``-``.| boolean |
 |  SERVER.INTERFACE | The interface of your network card. Usually eth0.| string |
+| SERVER.WORKDIR | Location of conf, database and logs. Default is './work' | string |
 
 ## Deployment
 ### Docker
@@ -72,7 +75,6 @@ services:
       image:  registry.gitlab.com/mawthuq-software/wireguard-manager-and-api:main
       volumes:
       - /etc/letsencrypt:/etc/letsencrypt
-      - /opt/wgManagerAPI:/opt/wgManagerAPI
       - /lib/modules:/lib/modules
       ports:
       - "8443:8443"
@@ -85,24 +87,24 @@ services:
         - net.ipv6.conf.all.disable_ipv6=0
 ```
 
-The docker-compose file is the easiest way to get software up and running. Do not forget to add your ``config.json`` file to ``/opt/wgManagerAPI/config.json``
+The docker-compose file is the easiest way to get software up and running. Do not forget to add your ``config.json`` file to ``./config.json``
 
 ### Building from source
 #### Code
 Building from source allows you to create an executable file which can be created into a Systemd service or equivalent. It also allows you to build for a different architecture such as ARM64. Running the executable must be run with sudo (recommended) or root (not recommended). 
 
-Do not forget to add your `config.json` file to `/opt/wgManagerAPI/config.json`
+Do not forget to add your `config.json` file to `./config.json`
 1. Install Go 1.14+ on to your machine
 2. git clone this repository
 3. ``cd wireguard-manager-and-api`` to open the repo
 4. ``go get`` to get packages
-5. ``go build -o wgManagerAPI main.go`` to build an output a executable file
+5. ``make`` to build an output a executable file
 6. ``sudo ./wgManagerAPI`` to run the application.
 
 #### Dockerfile
 Building a docker image from scratch enables you to create an image specific to a specific architecture such as ARM64 as prebuilt images in our docker image repository is made for AMD64 architecture.
 
-Do not forget to add your ``config.json`` file to ``/opt/wgManagerAPI/config.json``
+Do not forget to add your ``config.json`` file to ``./config.json``
 1. Install docker
 2. Clone the git repository and open the directory
 3. ``sudo docker build -t wireguard-manager-and-api:YOURTAGHERE .`` to build the docker image locally
@@ -115,7 +117,7 @@ With almost any API error the server will give back a ``400 Bad Request`` status
 Check out our [Postman documentation](https://documenter.getpostman.com/view/20105196/UVsPQQYz) for API requests.
 ## Debugging
 ### Logs
-If the Wireguard Manager and API application fails to start you should always look at your logs and the errors to see the problems look at ``/opt/wgManagerAPI/logs/`` folder and open the latest log using ``nano`` or any other text editor.
+If the Wireguard Manager and API application fails to start you should always look at your logs and the errors to see the problems look at ``./logs/`` folder and open the latest log using ``nano`` or any other text editor.
 
 ### FAQ
 **Q:** The prebuilt source file or docker image is not working properly.  

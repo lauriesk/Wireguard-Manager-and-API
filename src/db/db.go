@@ -16,11 +16,12 @@ var DBSystem *gorm.DB
 
 func DBStart() {
 	log.Println("Info - Database connection starting")
-	errCreateDir := os.MkdirAll("/opt/wgManagerAPI/wg", 0755) //create dir if not exist
+	dbDirectory := viper.GetString("SERVER.WORKDIR") + "/wg"
+	errCreateDir := os.MkdirAll(dbDirectory, 0755) //create dir if not exist
 	if errCreateDir != nil {
 		log.Fatal("Error - Creating wg directory", errCreateDir)
 	}
-	db, err := gorm.Open(sqlite.Open("/opt/wgManagerAPI/wg/wireguardPeers.db"), &gorm.Config{}) //open sqlite db
+	db, err := gorm.Open(sqlite.Open(dbDirectory + "/wireguardPeers.db"), &gorm.Config{}) //open sqlite db
 	if err != nil {
 		panic("Error - Failed to connect database")
 	}

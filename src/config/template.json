@@ -30,6 +30,7 @@
     "PORT": 51821
   },
   "SERVER": {
+    "WORKDIR": "./work",
     "PORT": "8443",
     "MAX_IP": "350",
     "AUTOCHECK": true,
